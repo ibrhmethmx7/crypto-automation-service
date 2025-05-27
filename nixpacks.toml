@@ -1,11 +1,8 @@
 [phases.setup]
-nixPkgs = ["nodejs", "python39", "chromium", "chromedriver"]
+nixPkgs = ["python39", "chromium", "chromedriver"]
 
 [phases.build]
-cmds = [
-    "pip install -r requirements.txt",
-    "npm install"
-]
+cmds = ["pip install -r requirements.txt"]
 
 [start]
-cmd = "node server.js"
+cmd = "python app.py"
