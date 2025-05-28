@@ -59,60 +59,12 @@ class MercuryoBot:
         sys.exit(1)
     
     def _setup_chrome(self):
-    """Chrome'u Railway için kurar"""
-    max_retries = 3
-    
-    for attempt in range(max_retries):
-        try:
-            send_to_node("log", {"message": f"[BotName:{self.order_id}] Chrome kurulum denemesi {attempt + 1}/{max_retries}", "level": "info"})
-            
-            chrome_options = webdriver.ChromeOptions()
-            
-            # Temel ayarlar
-            chrome_options.add_argument("--no-sandbox")
-            chrome_options.add_argument("--disable-dev-shm-usage")
-            chrome_options.add_argument("--disable-gpu")
-            chrome_options.add_argument("--window-size=1920,1080")
-            chrome_options.add_argument("--headless")  # Railway için zorunlu
-            chrome_options.add_argument("--disable-web-security")
-            chrome_options.add_argument("--single-process")
-            chrome_options.add_argument("--no-zygote")
-            
-            # Railway/Nix için Chromium binary path
-            if os.getenv('RAILWAY_ENVIRONMENT') or os.getenv('NIXPACKS_PLAN_PROVIDERS'):
-                # Railway'de chromium binary'sini bul
-                import glob
-                chromium_paths = glob.glob('/nix/store/*/bin/chromium')
-                if chromium_paths:
-                    chrome_options.binary_location = chromium_paths[0]
-                    send_to_node("log", {"message": f"[BotName:{self.order_id}] Chromium binary bulundu: {chromium_paths[0]}", "level": "info"})
-                
-                # ChromeDriver path
-                chromedriver_paths = glob.glob('/nix/store/*/bin/chromedriver')
-                if chromedriver_paths:
-                    service = Service(chromedriver_paths[0])
-                else:
-                    service = Service()  # Sistem PATH'inden bul
-                    
-                self.driver = webdriver.Chrome(service=service, options=chrome_options)
-            else:
-                # Local development için WebDriverManager
-                service = Service(ChromeDriverManager().install())
-                self.driver = webdriver.Chrome(service=service, options=chrome_options)
-            
-            send_to_node("log", {"message": f"[BotName:{self.order_id}] Chrome başarıyla başlatıldı!", "level": "success"})
-            return
-            
-        except Exception as e:
-            error_msg = str(e)
-            send_to_node("log", {"message": f"[BotName:{self.order_id}] Chrome kurulum hatası (deneme {attempt + 1}): {error_msg}", "level": "error"})
-            # ... rest of retry logic
         """Chrome'u WebDriver Manager ile kurar"""
         max_retries = 3
         
         for attempt in range(max_retries):
             try:
-                send_to_node("log", {"message": f"[MercuryoBot:{self.order_id}] Chrome kurulum denemesi {attempt + 1}/{max_retries}", "level": "info"})
+                send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Chrome kurulum denemesi {attempt + 1}/{max_retries}", "level": "info"})
                 
                 # Chrome options
                 chrome_options = webdriver.ChromeOptions()
@@ -129,11 +81,11 @@ class MercuryoBot:
                     chrome_options.add_argument("--disable-web-security")
                     chrome_options.add_argument("--single-process")
                     chrome_options.add_argument("--no-zygote")
-                    send_to_node("log", {"message": f"[MercuryoBot:{self.order_id}] Headless mode aktif", "level": "info"})
+                    send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Headless mode aktif", "level": "info"})
                 
                 # Unique temp directory
                 unique_id = str(uuid.uuid4())[:8]
-                self.temp_dir = tempfile.mkdtemp(prefix=f"chrome_mercuryo_{self.order_id}_{unique_id}_")
+                self.temp_dir = tempfile.mkdtemp(prefix=f"chrome_paybis_{self.order_id}_{unique_id}_")
                 chrome_options.add_argument(f"--user-data-dir={self.temp_dir}")
                 
                 # Anti-detection
@@ -154,14 +106,14 @@ class MercuryoBot:
                 chrome_options.add_argument("--memory-pressure-off")
                 chrome_options.add_argument("--max_old_space_size=1024")
                 
-                send_to_node("log", {"message": f"[MercuryoBot:{self.order_id}] ChromeDriver indiriliyor...", "level": "info"})
+                send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] ChromeDriver indiriliyor...", "level": "info"})
                 
                 # WebDriver Manager ile driver kurulumu
                 try:
                     service = Service(ChromeDriverManager().install())
                     self.driver = webdriver.Chrome(service=service, options=chrome_options)
                 except Exception as wdm_error:
-                    send_to_node("log", {"message": f"[MercuryoBot:{self.order_id}] WebDriverManager hatası: {wdm_error}", "level": "warn"})
+                    send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] WebDriverManager hatası: {wdm_error}", "level": "warn"})
                     # Fallback: sistem Chrome'u dene
                     self.driver = webdriver.Chrome(options=chrome_options)
                 
@@ -178,12 +130,12 @@ class MercuryoBot:
                     });
                 """)
                 
-                send_to_node("log", {"message": f"[MercuryoBot:{self.order_id}] Chrome başarıyla başlatıldı!", "level": "success"})
+                send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Chrome başarıyla başlatıldı!", "level": "success"})
                 return
                 
             except Exception as e:
                 error_msg = str(e)
-                send_to_node("log", {"message": f"[MercuryoBot:{self.order_id}] Chrome kurulum hatası (deneme {attempt + 1}): {error_msg}", "level": "error"})
+                send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Chrome kurulum hatası (deneme {attempt + 1}): {error_msg}", "level": "error"})
                 
                 # Cleanup yap
                 try:
@@ -202,10 +154,10 @@ class MercuryoBot:
                 
                 if attempt < max_retries - 1:
                     sleep_time = (attempt + 1) * 2
-                    send_to_node("log", {"message": f"[MercuryoBot:{self.order_id}] {sleep_time} saniye bekledikten sonra tekrar denenecek...", "level": "info"})
+                    send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] {sleep_time} saniye bekledikten sonra tekrar denenecek...", "level": "info"})
                     time.sleep(sleep_time)
                 else:
-                    send_to_node("error", {"message": f"[MercuryoBot:{self.order_id}] Chrome {max_retries} denemede de başlatılamadı: {error_msg}"})
+                    send_to_node("error", {"message": f"[PaybisBot:{self.order_id}] Chrome {max_retries} denemede de başlatılamadı: {error_msg}"})
                     raise Exception(f"Chrome setup failed after {max_retries} attempts: {error_msg}")
 
     def wait_for_page_load(self, timeout=30):
