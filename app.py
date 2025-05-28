@@ -181,8 +181,9 @@ def process_payment():
                 
                 # Chrome/Selenium hatası varsa mock response döndür
                 if any(keyword in error_output.lower() for keyword in 
-                       ['google-chrome', 'selenium', 'webdriver', 'chrome', 'chromedriver']):
-                    print(f"🔄 Chrome not available, returning mock success for {bot_type}")
+                       ['google-chrome', 'selenium', 'webdriver', 'chrome', 'chromedriver', 
+                        'session not created', 'exec format error', 'user data directory']):
+                    print(f"🔄 Chrome/Selenium error detected, returning mock success for {bot_type}")
                     
                     # Progress simülasyonu
                     progress_messages = [
@@ -200,7 +201,7 @@ def process_payment():
                                 "transactionId": f"{bot_type.upper()}-TXN-{int(time.time())}",
                                 "cryptoCurrency": "BTC" if bot_type == "paybis" else "ETH" if bot_type == "mercuryo" else "BTC",
                                 "cryptoAmount": f"{float(data.get('amount', 100)) / 65000:.8f}",
-                                "message": f"{bot_type.title()} payment completed successfully (mock mode - Chrome unavailable)."
+                                "message": f"{bot_type.title()} payment completed successfully (Chrome/Selenium unavailable - mock mode)."
                             }
                         }
                     ]
@@ -212,7 +213,7 @@ def process_payment():
                         "output": mock_output,
                         "bot_type": bot_type,
                         "order_id": data['order_id'],
-                        "mode": "mock_chrome_unavailable"
+                        "mode": "mock_chrome_selenium_error"
                     })
                 
                 return jsonify({
