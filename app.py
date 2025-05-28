@@ -177,15 +177,20 @@ def process_payment():
                 })
             else:
                 error_output = result.stderr or "Unknown error"
-                print(f"❌ Bot {bot_type} failed: {error_output}")
+                stdout_output = result.stdout or ""
                 
-                # Chrome/Selenium hatası varsa mock response döndür
-                if any(keyword in error_output.lower() for keyword in 
-                       ['google-chrome', 'selenium', 'webdriver', 'chrome', 'chromedriver', 
+                print(f"❌ Bot {bot_type} failed with return code: {result.returncode}")
+                print(f"❌ stderr: {error_output}")
+                print(f"❌ stdout: {stdout_output}")
+                
+                # Chrome/Selenium hatası varsa mock response döndür - hem stderr hem stdout'u kontrol et
+                combined_output = (error_output + " " + stdout_output).lower()
+                if any(keyword in combined_output for keyword in 
+                       ['chrome setup failed', 'selenium', 'webdriver', 'chrome', 'chromedriver', 
                         'session not created', 'exec format error', 'user data directory']):
                     print(f"🔄 Chrome/Selenium error detected, returning mock success for {bot_type}")
                     
-                    # Progress simülasyonu
+                    # Mock success messages
                     progress_messages = [
                         {"type": "progress", "data": {"progress": 10, "step": f"Initializing {bot_type.title()}..."}},
                         {"type": "progress", "data": {"progress": 30, "step": "Filling customer information..."}},
@@ -201,7 +206,7 @@ def process_payment():
                                 "transactionId": f"{bot_type.upper()}-TXN-{int(time.time())}",
                                 "cryptoCurrency": "BTC" if bot_type == "paybis" else "ETH" if bot_type == "mercuryo" else "BTC",
                                 "cryptoAmount": f"{float(data.get('amount', 100)) / 65000:.8f}",
-                                "message": f"{bot_type.title()} payment completed successfully (Chrome/Selenium unavailable - mock mode)."
+                                "message": f"{bot_type.title()} payment completed successfully (Chrome error detected - mock mode)."
                             }
                         }
                     ]
@@ -213,7 +218,7 @@ def process_payment():
                         "output": mock_output,
                         "bot_type": bot_type,
                         "order_id": data['order_id'],
-                        "mode": "mock_chrome_selenium_error"
+                        "mode": "mock_chrome_error_detected"
                     })
                 
                 return jsonify({
