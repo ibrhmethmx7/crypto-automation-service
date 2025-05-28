@@ -1,8 +1,12 @@
 [phases.setup]
-nixPkgs = ["python39", "chromium", "chromedriver"]
+nixPkgs = ["python3", "pip", "chromium", "chromedriver-bin"]
 
-[phases.build]
-cmds = ["pip install -r requirements.txt"]
+[phases.install] 
+cmds = ["pip3 install -r requirements.txt"]
 
 [start]
-cmd = "python app.py"
+cmd = "python3 app.py"
+
+[variables]
+PYTHONUNBUFFERED = "1"
+CHROME_BIN = "/nix/store/*/bin/chromium"
