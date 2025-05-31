@@ -3562,7 +3562,7 @@ def page_changed_significantly(self, old_state, new_state):
         finally:
             self.cleanup()
 
-    def cleanup(self):
+    
         """Temizlik işlemi"""
         send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Temizlik işlemi başlatılıyor.", "level": "info"})
         
@@ -3582,6 +3582,25 @@ def page_changed_significantly(self, old_state, new_state):
             except Exception as e:
                 send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Temp directory temizleme hatası: {str(e)}", "level": "warn"})
 
+            def cleanup(self):
+            """Temizlik işlemi"""
+            send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Temizlik işlemi başlatılıyor.", "level": "info"})
+            
+            if self.driver:
+                try:
+                    self.driver.quit()
+                    send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Chrome driver kapatıldı.", "level": "debug"})
+                except Exception as e:
+                    send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Driver kapatma hatası: {str(e)}", "level": "warn"})
+                finally:
+                    self.driver = None
+            
+            if hasattr(self, 'temp_dir') and self.temp_dir and os.path.exists(self.temp_dir):
+                try:
+                    shutil.rmtree(self.temp_dir, ignore_errors=True)
+                    send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Temp directory temizlendi.", "level": "debug"})
+                except Exception as e:
+                    send_to_node("log", {"message": f"[PaybisBot:{self.order_id}] Temp directory temizleme hatası: {str(e)}", "level": "warn"})
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Paybis Payment Bot")
     
